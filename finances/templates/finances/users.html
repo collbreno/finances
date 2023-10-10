@@ -1,0 +1,12 @@
+<ul>
+    {% for user in users %}
+        <li>
+            <a href="{% url 'finances:user' user.email %}">
+                {{ user.name }}
+            </a>
+        </li>
+    {% endfor %}
+</ul>
+<a href="{% url 'finances:new_user_form' %}">
+    Criar novo usuario
+</a>

@@ -1,0 +1,10 @@
+<form action="{% url "finances:add_user" %}" method="post">
+    {% csrf_token %}
+    <fieldset>
+        <label for="email">Enter your email:</label>
+        <input type="email" name="email" id="email">
+        <label for="name">Enter your name:</label>
+        <input type="text" name="name" id="name">
+    </fieldset>
+    <input type="submit" value="Create">
+</form>
