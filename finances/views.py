@@ -1,4 +1,7 @@
 import yfinance as yf
+from matplotlib import pyplot as plt
+from io import BytesIO
+import base64
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -11,8 +14,11 @@ from .models import Person
 def index(request):
     return render(request, "finances/index.html")
 
-def symbols(requests):
-    return HttpResponse('lista de simbolos')
+def symbols(request):
+    context = {
+        'symbols': ['GOGL34.SA', 'AAPL34.SA'],
+    }
+    return render(request, "finances/symbols.html", context=context)
 
 def new_user_form(request):
     return render(request, "finances/new_user_form.html")
@@ -35,12 +41,23 @@ class UserView(generic.DetailView):
     context_object_name = 'user'
 
 def symbol(request, symbol):
-    try:
-        ticker = yf.Ticker(symbol)
-    except HTTPError:
-        return HttpResponse(f"{symbol} not found")
-    price = ticker.info["currentPrice"]
-    short_name = ticker.info["shortName"]
-    long_name = ticker.info["longName"]
-    currency = ticker.info["currency"]
-    return HttpResponse(f"vc esta vendo a acao {symbol} \nEmpresa: {long_name}\nValor: {price} {currency}")
+    df = yf.download(symbol, period='1day', interval='1m')
+    df['Hour_Min'] = df.index.strftime('%H:%M')
+    plt.figure(figsize=(12, 6))
+    plt.plot(df['Hour_Min'], df['Close'])
+    plt.ylabel('Valor da ação')
+    plt.xticks(df.index[df.index.minute % 30 == 0].strftime('%H:%M'))
+    plt.legend()
+
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    plt.close()
+
+    image_data = base64.b64encode(buffer.read()).decode('utf-8')
+    context = {
+        'image_data': image_data,
+        'symbol': symbol,
+    }
+
+    return render(request, 'finances/symbol.html', context)
