@@ -1,7 +1,5 @@
 import yfinance as yf
-from matplotlib import pyplot as plt
-from io import BytesIO
-import base64
+import json
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -42,22 +40,15 @@ class UserView(generic.DetailView):
 
 def symbol(request, symbol):
     df = yf.download(symbol, period='1day', interval='1m')
-    df['Hour_Min'] = df.index.strftime('%H:%M')
-    plt.figure(figsize=(12, 6))
-    plt.plot(df['Hour_Min'], df['Close'])
-    plt.ylabel('Valor da ação')
-    plt.xticks(df.index[df.index.minute % 30 == 0].strftime('%H:%M'))
-    plt.legend()
 
-    buffer = BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    plt.close()
+    graph_data = {
+        'x': df.index.strftime('%H:%M').tolist(),
+        'y': df['Close'].tolist(),
+    }
 
-    image_data = base64.b64encode(buffer.read()).decode('utf-8')
     context = {
-        'image_data': image_data,
-        'symbol': symbol,
+        'graph_data': json.dumps(graph_data),
+        'symbol': symbol.upper(),
     }
 
     return render(request, 'finances/symbol.html', context)
