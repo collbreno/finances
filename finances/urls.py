@@ -12,6 +12,6 @@ urlpatterns = [
     path("add_user/", views.add_user, name="add_user"),
     path("add_user_stock/", views.add_user_stock, name="add_user_stock"),
     path("symbols/", views.symbols, name="symbols"),
-    path("symbols/<str:stock_symbol>", views.symbol, name="symbol"),
-    path("symbols/<str:stock_symbol>/tunnel_form", views.tunnel_form, name="tunnel_form"),
+    path("symbols/<str:stock_symbol>/", views.symbol, name="symbol"),
+    path("symbols/<str:stock_symbol>/tunnel_form/", views.tunnel_form, name="tunnel_form"),
 ]

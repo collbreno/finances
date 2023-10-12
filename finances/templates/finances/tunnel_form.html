@@ -12,11 +12,11 @@
             <input type="hidden" id="stock_symbol" name="stock_symbol" value="{{ stock_symbol }}">
 
             <label for="min_limit">Limite mínimo:</label>
-            <input type="number" name="min_limit" id="min_limit">
+            <input onchange="limitChanged()" type="number" name="min_limit" id="min_limit">
             <br>
 
             <label for="max_limit">Limite máximo:</label>
-            <input type="number" name="max_limit" id="max_limit">
+            <input onchange="limitChanged()" type="number" name="max_limit" id="max_limit">
             <br>
 
             <label for="time_interval">Intervalo (em minutos):</label>
@@ -32,5 +32,33 @@
             <input type="submit" value="Salvar">
         </fieldset>
     </form>
+    <script>
+        const chart = Chart.getChart("stock-chart")
+
+        function limitChanged() {
+            const limits = []
+            const min_limit = document.getElementById('min_limit').value
+            const max_limit = document.getElementById('max_limit').value
+            if (min_limit) {
+                limits.push(createLine(min_limit))
+            }
+            if (max_limit) {
+                limits.push(createLine(max_limit))
+            }
+            chart.options.plugins.annotation.annotations = limits
+            chart.update()
+        }
+
+        function createLine(y) {
+            return ({
+                type: 'line',
+                yMin: y,
+                yMax: y,
+                borderColor: 'rgb(255, 99, 132)',
+                borderWidth: 2,
+              })  
+        }
+    
+    </script>
 </body>
 </html>
