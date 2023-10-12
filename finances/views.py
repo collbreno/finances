@@ -14,7 +14,7 @@ def index(request):
 
 def symbols(request):
     context = {
-        'symbols': ['GOGL34.SA', 'AAPL34.SA'],
+        'symbols': ['GOGL34.SA', 'AAPL34.SA', 'ABEV3.SA', 'U1BE34.SA', 'NFLX34.SA'],
     }
     return render(request, "finances/symbols.html", context=context)
 
