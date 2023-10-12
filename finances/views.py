@@ -55,6 +55,12 @@ class UserView(generic.DetailView):
     template_name = "finances/user.html"
     context_object_name = 'user'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tunnels"] = self.get_object().personstock_set.all()
+        return context
+    
+
 def tunnel_form(request, stock_symbol):
     df = yf.download(stock_symbol, period='1day', interval='1m')
     emails = list(map(lambda p: p.email, Person.objects.all()))    
