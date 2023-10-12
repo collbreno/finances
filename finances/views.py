@@ -7,7 +7,7 @@ from requests.exceptions import HTTPError
 from django.urls import reverse
 from django.views import generic
 
-from .models import Person, Tunnel
+from .models import User, Tunnel
 
 def index(request):
     return render(request, "finances/index.html")
@@ -24,19 +24,19 @@ def new_user_form(request):
 def add_user(request):
     name = request.POST["name"]
     email = request.POST["email"]
-    person = Person(name=name, email=email)
-    person.save()
+    user = User(name=name, email=email)
+    user.save()
     return HttpResponseRedirect(reverse("finances:users"))
 
 def add_user_stock(request):
     email = request.POST['email']
-    person = Person.objects.get(email=email)
+    user = User.objects.get(email=email)
     stock_symbol = request.POST['stock_symbol']
     min_limit = request.POST['min_limit']
     max_limit = request.POST['max_limit']
     time_interval = request.POST['time_interval']
     tunnel = Tunnel(
-        person=person, 
+        user=user, 
         stock_symbol=stock_symbol, 
         min_limit=min_limit, 
         max_limit=max_limit,
@@ -46,12 +46,12 @@ def add_user_stock(request):
     return HttpResponseRedirect(reverse('finances:users'))
 
 class UsersView(generic.ListView):
-    model = Person
+    model = User
     template_name = "finances/users.html"
     context_object_name = "users"
 
 class UserView(generic.DetailView):
-    model = Person
+    model = User
     template_name = "finances/user.html"
     context_object_name = 'user'
 
@@ -63,7 +63,7 @@ class UserView(generic.DetailView):
 
 def tunnel_form(request, stock_symbol):
     df = yf.download(stock_symbol, period='1day', interval='1m')
-    emails = list(map(lambda p: p.email, Person.objects.all()))    
+    emails = list(map(lambda p: p.email, User.objects.all()))    
     graph_data = {
         'x': df.index.strftime('%H:%M').tolist(),
         'y': df['Close'].tolist(),
