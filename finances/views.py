@@ -7,7 +7,7 @@ from requests.exceptions import HTTPError
 from django.urls import reverse
 from django.views import generic
 
-from .models import Person
+from .models import Person, PersonStock
 
 def index(request):
     return render(request, "finances/index.html")
@@ -28,6 +28,23 @@ def add_user(request):
     person.save()
     return HttpResponseRedirect(reverse("finances:users"))
 
+def add_user_stock(request):
+    email = request.POST['email']
+    person = Person.objects.get(email=email)
+    stock_symbol = request.POST['stock_symbol']
+    min_limit = request.POST['min_limit']
+    max_limit = request.POST['max_limit']
+    time_interval = request.POST['time_interval']
+    ps = PersonStock(
+        person=person, 
+        stock_symbol=stock_symbol, 
+        min_limit=min_limit, 
+        max_limit=max_limit,
+        time_interval=time_interval,
+    )
+    ps.save()
+    return HttpResponseRedirect(reverse('finances:users'))
+
 class UsersView(generic.ListView):
     model = Person
     template_name = "finances/users.html"
@@ -40,6 +57,7 @@ class UserView(generic.DetailView):
 
 def symbol(request, symbol):
     df = yf.download(symbol, period='1day', interval='1m')
+    emails = list(map(lambda p: p.email, Person.objects.all()))
 
     graph_data = {
         'x': df.index.strftime('%H:%M').tolist(),
@@ -49,6 +67,7 @@ def symbol(request, symbol):
     context = {
         'graph_data': json.dumps(graph_data),
         'symbol': symbol.upper(),
+        'emails': emails,
     }
 
     return render(request, 'finances/symbol.html', context)
