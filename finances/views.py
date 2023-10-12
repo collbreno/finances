@@ -1,5 +1,6 @@
 import yfinance as yf
 import json
+import locale
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -37,7 +38,7 @@ def add_user_stock(request):
     time_interval = request.POST['time_interval']
     tunnel = Tunnel(
         user=user, 
-        stock_symbol=stock_symbol, 
+        stock_symbol=stock_symbol.upper(), 
         min_limit=min_limit, 
         max_limit=max_limit,
         time_interval=time_interval,
@@ -72,14 +73,16 @@ def tunnel_form(request, stock_symbol):
     context = {
         'emails': emails,
         'graph_data': json.dumps(graph_data),
-        'stock_symbol': stock_symbol,
+        'stock_symbol': stock_symbol.upper(),
     }
 
     return render(request, 'finances/tunnel_form.html', context)
 
 def symbol(request, stock_symbol):
     df = yf.download(stock_symbol, period='1day', interval='1m')
-    tunnels = Tunnel.objects.all()
+    tunnels = Tunnel.objects.filter(stock_symbol=stock_symbol)
+    locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+    last_price = locale.currency(df['Close'].iloc[-1])
 
     graph_data = {
         'x': df.index.strftime('%H:%M').tolist(),
@@ -89,7 +92,8 @@ def symbol(request, stock_symbol):
     context = {
         'graph_data': json.dumps(graph_data),
         'stock_symbol': stock_symbol.upper(),
-        'tunnels': tunnels
+        'tunnels': tunnels,
+        'last_price': last_price,
     }
 
     return render(request, 'finances/symbol.html', context)
