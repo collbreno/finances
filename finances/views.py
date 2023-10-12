@@ -55,9 +55,25 @@ class UserView(generic.DetailView):
     template_name = "finances/user.html"
     context_object_name = 'user'
 
-def symbol(request, symbol):
-    df = yf.download(symbol, period='1day', interval='1m')
-    emails = list(map(lambda p: p.email, Person.objects.all()))
+def tunnel_form(request, stock_symbol):
+    df = yf.download(stock_symbol, period='1day', interval='1m')
+    emails = list(map(lambda p: p.email, Person.objects.all()))    
+    graph_data = {
+        'x': df.index.strftime('%H:%M').tolist(),
+        'y': df['Close'].tolist(),
+    }
+
+    context = {
+        'emails': emails,
+        'graph_data': json.dumps(graph_data),
+        'stock_symbol': stock_symbol,
+    }
+
+    return render(request, 'finances/tunnel_form.html', context)
+
+def symbol(request, stock_symbol):
+    df = yf.download(stock_symbol, period='1day', interval='1m')
+    tunnels = PersonStock.objects.all()
 
     graph_data = {
         'x': df.index.strftime('%H:%M').tolist(),
@@ -66,8 +82,16 @@ def symbol(request, symbol):
 
     context = {
         'graph_data': json.dumps(graph_data),
-        'symbol': symbol.upper(),
-        'emails': emails,
+        'stock_symbol': stock_symbol.upper(),
+        'tunnels': tunnels
     }
 
     return render(request, 'finances/symbol.html', context)
+
+def tunnels_table(request):
+    user_stocks = PersonStock.objects.all()
+    context = {
+        'user_stocks': user_stocks
+    }
+
+    return render(request, 'finances/tunnels_table.html', context)

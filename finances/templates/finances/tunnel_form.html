@@ -1,26 +1,36 @@
-<form action="{% url "finances:add_user_stock" %}" method="post">
-    {% csrf_token %}
-    <fieldset>
-        <input type="hidden" id="stock_symbol" name="stock_symbol" value="{{ symbol }}">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plot with Chart.js</title>
+</head>
+<body>
+    {% include "finances/stock_graph.html" %}
 
-        <label for="min_limit">Limite mínimo:</label>
-        <input type="number" name="min_limit" id="min_limit">
-        <br>
+    <form action="{% url "finances:add_user_stock" %}" method="post">
+        {% csrf_token %}
+        <fieldset>
+            <input type="hidden" id="stock_symbol" name="stock_symbol" value="{{ stock_symbol }}">
 
-        <label for="max_limit">Limite máximo:</label>
-        <input type="number" name="max_limit" id="max_limit">
-        <br>
+            <label for="min_limit">Limite mínimo:</label>
+            <input type="number" name="min_limit" id="min_limit">
+            <br>
 
-        <label for="time_interval">Intervalo (em minutos):</label>
-        <input type="number" name="time_interval" id="time_interval">
-        <br>
-        
-        <label for="email">Email:</label>
-        <select name="email" id="email">
-            {% for email in emails %}
-                <option value="{{ email }}">{{ email }}</option>
-            {% endfor %}
-        </select>
-        <input type="submit" value="Salvar">
-    </fieldset>
-</form>
+            <label for="max_limit">Limite máximo:</label>
+            <input type="number" name="max_limit" id="max_limit">
+            <br>
+
+            <label for="time_interval">Intervalo (em minutos):</label>
+            <input type="number" name="time_interval" id="time_interval">
+            <br>
+            
+            <label for="email">Email:</label>
+            <select name="email" id="email">
+                {% for email in emails %}
+                    <option value="{{ email }}">{{ email }}</option>
+                {% endfor %}
+            </select>
+            <input type="submit" value="Salvar">
+        </fieldset>
+    </form>
+</body>
+</html>

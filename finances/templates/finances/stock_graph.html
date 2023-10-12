@@ -1,0 +1,49 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div id="chart-wrapper">
+    <canvas id="stock-chart"></canvas>
+</div>
+
+<script>
+    var graph_data = JSON.parse('{{ graph_data|escapejs }}');
+
+    var ctx = document.getElementById('stock-chart').getContext('2d');
+
+    var stockChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: graph_data.x,
+            datasets: [{
+                label: 'Stock Value',
+                data: graph_data.y,
+                borderWidth: 2,
+                borderColor: 'rgba(0, 100, 200)',
+                pointStyle: 'circle',
+                pointRadius: 1,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Hour:Minute of the Day'
+                    }
+                }],
+                y: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Stock Value'
+                    }
+                }]
+            }
+        }
+    });
+</script>
+
+<style>
+    #chart-wrapper {
+      width: 800px;
+    }
+</style>

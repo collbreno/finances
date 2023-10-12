@@ -1,0 +1,50 @@
+<table>
+    <thead>
+        <tr>
+            <th>Símbolo</th>
+            <th>Email</th>
+            <th>Limite mínimo</th>
+            <th>Limite máximo</th>
+            <th>Intervalo (em minutos)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tunnel in tunnels %}
+            <tr>
+                <td>{{ tunnel.stock_symbol }}</td>
+                <td>{{ tunnel.person }}</td>
+                <td>{{ tunnel.min_limit }}</td>
+                <td>{{ tunnel.max_limit }}</td>
+                <td>{{ tunnel.time_interval }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    
+    td, th {
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
+        color: #222;
+    }
+</style>
