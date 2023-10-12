@@ -7,7 +7,7 @@ from requests.exceptions import HTTPError
 from django.urls import reverse
 from django.views import generic
 
-from .models import Person, PersonStock
+from .models import Person, Tunnel
 
 def index(request):
     return render(request, "finances/index.html")
@@ -35,14 +35,14 @@ def add_user_stock(request):
     min_limit = request.POST['min_limit']
     max_limit = request.POST['max_limit']
     time_interval = request.POST['time_interval']
-    ps = PersonStock(
+    tunnel = Tunnel(
         person=person, 
         stock_symbol=stock_symbol, 
         min_limit=min_limit, 
         max_limit=max_limit,
         time_interval=time_interval,
     )
-    ps.save()
+    tunnel.save()
     return HttpResponseRedirect(reverse('finances:users'))
 
 class UsersView(generic.ListView):
@@ -57,7 +57,7 @@ class UserView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["tunnels"] = self.get_object().personstock_set.all()
+        context["tunnels"] = self.get_object().tunnel_set.all()
         return context
     
 
@@ -79,7 +79,7 @@ def tunnel_form(request, stock_symbol):
 
 def symbol(request, stock_symbol):
     df = yf.download(stock_symbol, period='1day', interval='1m')
-    tunnels = PersonStock.objects.all()
+    tunnels = Tunnel.objects.all()
 
     graph_data = {
         'x': df.index.strftime('%H:%M').tolist(),
@@ -93,11 +93,3 @@ def symbol(request, stock_symbol):
     }
 
     return render(request, 'finances/symbol.html', context)
-
-def tunnels_table(request):
-    user_stocks = PersonStock.objects.all()
-    context = {
-        'user_stocks': user_stocks
-    }
-
-    return render(request, 'finances/tunnels_table.html', context)

@@ -7,7 +7,7 @@ class Person(models.Model):
     def __str__(self):
         return self.email
     
-class PersonStock(models.Model):
+class Tunnel(models.Model):
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
     stock_symbol = models.CharField(max_length=20)
     min_limit = models.FloatField()
