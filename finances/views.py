@@ -8,7 +8,7 @@ from requests.exceptions import HTTPError
 from django.urls import reverse
 from django.views import generic
 
-from .models import User, Tunnel
+from .models import User, Tunnel, Notification
 
 def index(request):
     return render(request, "finances/index.html")
@@ -64,7 +64,10 @@ class UserView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["tunnels"] = self.get_object().tunnel_set.all()
+        tunnels = self.get_object().tunnel_set.all()
+        context["tunnels"] = tunnels
+
+        context["notifications"] = Notification.objects.filter(tunnel__user=self.get_object())
         return context
     
 

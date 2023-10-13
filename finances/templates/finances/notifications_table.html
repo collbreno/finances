@@ -1,0 +1,30 @@
+<table class="table">
+    <thead>
+        <tr>
+            <th>Símbolo</th>
+            <th>Email</th>
+            <th>Valor</th>
+            <th>Data e Hora</th>
+            <th>Sugestão</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for notification in notifications %}
+            <tr>
+                <td>
+                    <a href="{% url "finances:symbol" notification.tunnel.stock_symbol %}">
+                        {{ notification.tunnel.stock_symbol }}
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url "finances:user" notification.tunnel.user %}">
+                        {{ notification.tunnel.user }}
+                    </a>
+                </td>
+                <td>{{ notification.price }}</td>
+                <td>{{ notification.datetime }}</td>
+                <td>{{ notification.get_suggestion_display }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
