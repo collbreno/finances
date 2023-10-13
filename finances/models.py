@@ -19,3 +19,17 @@ class Tunnel(models.Model):
                 f'[{self.min_limit},{self.max_limit}] ' 
                 f'{self.time_interval}min')
     
+class Notification(models.Model):
+    BUY = "B"
+    SELL = "S"
+    OPTIONS = [
+        (BUY, "Comprar"),
+        (SELL, "Vender"),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    tunnel = models.ForeignKey(Tunnel, on_delete=models.CASCADE)
+    currentPrice = models.DecimalField(max_digits=10, decimal_places=2)
+    datetime = models.DateTimeField()
+    suggestion = models.CharField(max_length=1, choices=OPTIONS)
+    
