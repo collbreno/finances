@@ -44,7 +44,13 @@ def add_tunnel(request):
         time_interval=time_interval,
     )
     tunnel.save()
-    return HttpResponseRedirect(reverse('finances:users'))
+    return HttpResponseRedirect(reverse("finances:symbol", args=(stock_symbol,)))
+
+def delete_tunnel(request):
+    tunnel_id = request.POST['tunnel_id']
+    tunnel = Tunnel.objects.get(pk=tunnel_id)
+    tunnel.delete()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 class UsersView(generic.ListView):
     model = User

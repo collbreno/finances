@@ -6,16 +6,32 @@
             <th>Limite mínimo</th>
             <th>Limite máximo</th>
             <th>Intervalo (em minutos)</th>
+            <th>Ações</th>
         </tr>
     </thead>
     <tbody>
         {% for tunnel in tunnels %}
             <tr>
-                <td>{{ tunnel.stock_symbol }}</td>
-                <td>{{ tunnel.user }}</td>
+                <td>
+                    <a href="{% url "finances:symbol" tunnel.stock_symbol %}">
+                        {{ tunnel.stock_symbol }}
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url "finances:user" tunnel.user %}">
+                        {{ tunnel.user }}
+                    </a>
+                </td>
                 <td>{{ tunnel.min_limit }}</td>
                 <td>{{ tunnel.max_limit }}</td>
                 <td>{{ tunnel.time_interval }}</td>
+                <td>
+                    <form action="{% url "finances:delete_tunnel" %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="tunnel_id" id="tunnel_id" value="{{ tunnel.id }}">
+                        <input type="submit" class="btn btn-danger" value="Deletar">
+                    </form>
+                </td>
             </tr>
         {% endfor %}
     </tbody>
