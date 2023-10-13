@@ -1,32 +1,46 @@
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-
-<input class="form-control" type="text" id="search_input" onkeyup="myFunction()" placeholder="Pesquise por um símbolo...">
-
-<div class="list-group" id="symbol_list">
-    {% for symbol in symbols %}
-          <a  class="list-group-item list-group-item-action" 
-            href="{% url 'finances:symbol' symbol %}">
-              {{ symbol }}
-          </a>
-    {% endfor %}
-</div>
-
-<script>
-    function myFunction() {
-        var input, filter, listGroup, a, i, txtValue, items;
-        input = document.getElementById("search_input");
-        filter = input.value.toUpperCase();
-        listGroup = document.getElementById("symbol_list");
-        items = listGroup.getElementsByTagName("a");
-        for (i = 0; i < items.length; i++) {
-            item = items[i]
-            txtValue = item.textContent || item.innerText;
-            if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                item.style.display = "";
-            } else {
-                item.style.display = "none";
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8">
+        <title>Ações</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <input class="form-control" type="text" id="search_input" onkeyup="myFunction()" placeholder="Pesquise por um símbolo...">
+        
+        <div class="list-group" id="symbol_list">
+            {% for symbol in symbols %}
+                  <a  class="list-group-item list-group-item-action" 
+                    href="{% url 'finances:symbol' symbol %}">
+                      {{ symbol }}
+                  </a>
+            {% endfor %}
+        </div>
+        
+        <script>
+            function myFunction() {
+                var input, filter, listGroup, a, i, txtValue, items;
+                input = document.getElementById("search_input");
+                filter = input.value.toUpperCase();
+                listGroup = document.getElementById("symbol_list");
+                items = listGroup.getElementsByTagName("a");
+                for (i = 0; i < items.length; i++) {
+                    item = items[i]
+                    txtValue = item.textContent || item.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        item.style.display = "";
+                    } else {
+                        item.style.display = "none";
+                    }
+                }
             }
-        }
-    }
-</script>
+        </script>
+        <style>
+            body {
+                max-width: 900px;
+                margin: auto;
+            }
+        </style>
+    </body>
+</html>
