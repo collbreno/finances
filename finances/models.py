@@ -27,7 +27,6 @@ class Notification(models.Model):
         (SELL, "Vender"),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
     tunnel = models.ForeignKey(Tunnel, on_delete=models.CASCADE)
     currentPrice = models.DecimalField(max_digits=10, decimal_places=2)
     datetime = models.DateTimeField()
