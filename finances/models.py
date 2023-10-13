@@ -32,3 +32,6 @@ class Notification(models.Model):
     datetime = models.DateTimeField()
     suggestion = models.CharField(max_length=1, choices=OPTIONS)
     
+    def __str__(self):
+        return (f'{self.tunnel.stock_symbol}' 
+                f' {self.price}$ {self.datetime} ')
