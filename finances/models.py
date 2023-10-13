@@ -10,8 +10,8 @@ class User(models.Model):
 class Tunnel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     stock_symbol = models.CharField(max_length=20)
-    min_limit = models.FloatField()
-    max_limit = models.FloatField()
+    min_limit = models.DecimalField(max_digits=10, decimal_places=2)
+    max_limit = models.DecimalField(max_digits=10, decimal_places=2)
     time_interval = models.IntegerField()
 
     def __str__(self):
