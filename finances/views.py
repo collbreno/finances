@@ -29,7 +29,7 @@ def add_user(request):
     user.save()
     return HttpResponseRedirect(reverse("finances:users"))
 
-def add_user_stock(request):
+def add_tunnel(request):
     email = request.POST['email']
     user = User.objects.get(email=email)
     stock_symbol = request.POST['stock_symbol']

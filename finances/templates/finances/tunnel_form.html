@@ -9,7 +9,7 @@
     <body>
         {% include "finances/stock_graph.html" %}
 
-        <form class="row g-3" action="{% url "finances:add_user_stock" %}" method="post">
+        <form class="row g-3" action="{% url "finances:add_tunnel" %}" method="post">
             {% csrf_token %}
             <input type="hidden" id="stock_symbol" name="stock_symbol" value="{{ stock_symbol }}">
 
