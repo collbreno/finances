@@ -8,13 +8,15 @@ from django.views import generic
 
 from .models import User, Tunnel, Notification
 from .utils import get_stock_graph_data
+from .constants import ALL_STOCKS
+from .exceptions import EmptyStockHistory
 
 def index(request):
     return render(request, "finances/index.html")
 
 def symbols(request):
     context = {
-        'symbols': ['GOGL34.SA', 'AAPL34.SA', 'ABEV3.SA', 'U1BE34.SA', 'NFLX34.SA'],
+        'symbols': ALL_STOCKS,
     }
     return render(request, "finances/symbols.html", context=context)
 
@@ -83,7 +85,13 @@ def tunnel_form(request, stock_symbol):
     return render(request, 'finances/tunnel_form.html', context)
 
 def symbol(request, stock_symbol):
-    graph_data = get_stock_graph_data(stock_symbol)
+    try:
+        graph_data = get_stock_graph_data(stock_symbol)
+    except EmptyStockHistory:
+        context = {
+            'error_message': f'A ação {stock_symbol} não possui histórico de preço.'
+        }
+        return render(request, 'finances/error_page.html', context)
     tunnels = Tunnel.objects.filter(stock_symbol=stock_symbol)
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
