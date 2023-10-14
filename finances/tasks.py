@@ -1,38 +1,36 @@
-import yfinance as yf
-
-from django.conf import settings
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 from .models import Tunnel, Notification
+from .utils import download_stock
 
-scheduler = BlockingScheduler(timezone=settings.TIME_ZONE)
 
-def schedule_tasks_for_existing_tunnels():
+def schedule_tasks_for_existing_tunnels(scheduler: BlockingScheduler):
     tunnels = Tunnel.objects.all()
     for tunnel in tunnels:
-        watch_tunnel(tunnel)
+        watch_tunnel(scheduler, tunnel)
     scheduler.start()
 
-def watch_tunnel(tunnel: Tunnel):
+def watch_tunnel(scheduler: BlockingScheduler, tunnel: Tunnel):
     scheduler.add_job(
         check_tunnel,
         args=(tunnel,),
-        trigger=CronTrigger(second="*/5"),
+        trigger=CronTrigger(second=f"*/{tunnel.time_interval}"),
         id=f'tunnel#{tunnel.id}',
         max_instances=1,
+        replace_existing=True,
     )
     print(f'Adicionei task do tunel {tunnel.id}')
 
 def check_tunnel(tunnel: Tunnel):
     print('rodando task do tunnel')
     stock_symbol = tunnel.stock_symbol
-    history = yf.download(stock_symbol, period='1day', interval='1m')
-    stock_datetime = history.index[-1]
-    stock_price = history['Close'][-1]
+    history = download_stock(stock_symbol)
+    stock_datetime = history['datetime'].iloc[-1]
+    stock_price = history['price'].iloc[-1]
 
     try:
-        last_notification_dt = Notification.objects.filter(tunnel=tunnel).latest('datetime').datetime
+        last_notification_dt = Notification.objects.filter(tunnel__stock_symbol=stock_symbol).latest('datetime').datetime
     except Notification.DoesNotExist:
         last_notification_dt = None
     

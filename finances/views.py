@@ -1,14 +1,13 @@
-import yfinance as yf
 import json
 import locale
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from requests.exceptions import HTTPError
 from django.urls import reverse
 from django.views import generic
 
 from .models import User, Tunnel, Notification
+from .utils import get_stock_graph_data
 
 def index(request):
     return render(request, "finances/index.html")
@@ -72,12 +71,8 @@ class UserView(generic.DetailView):
     
 
 def tunnel_form(request, stock_symbol):
-    df = yf.download(stock_symbol, period='1day', interval='1m')
+    graph_data = get_stock_graph_data(stock_symbol)
     emails = list(map(lambda p: p.email, User.objects.all()))    
-    graph_data = {
-        'x': df.index.strftime('%H:%M').tolist(),
-        'y': df['Close'].tolist(),
-    }
 
     context = {
         'emails': emails,
@@ -88,21 +83,15 @@ def tunnel_form(request, stock_symbol):
     return render(request, 'finances/tunnel_form.html', context)
 
 def symbol(request, stock_symbol):
-    df = yf.download(stock_symbol, period='1day', interval='1m')
+    graph_data = get_stock_graph_data(stock_symbol)
     tunnels = Tunnel.objects.filter(stock_symbol=stock_symbol)
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-    last_price = locale.currency(df['Close'].iloc[-1])
-
-    graph_data = {
-        'x': df.index.strftime('%H:%M').tolist(),
-        'y': df['Close'].tolist(),
-    }
 
     context = {
         'graph_data': json.dumps(graph_data),
         'stock_symbol': stock_symbol.upper(),
         'tunnels': tunnels,
-        'last_price': last_price,
+        'last_price': locale.currency(graph_data['y'][-1]),
     }
 
     return render(request, 'finances/symbol.html', context)
