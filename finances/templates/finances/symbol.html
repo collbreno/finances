@@ -6,25 +6,28 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
         <style>
-            body {
+            .body-content {
                 max-width: 900px;
                 margin: auto;
             }
         </style>
     </head>
     <body>
-        <h3> {{ stock_symbol }} </h3>
-        <h6> Último valor: {{ last_price }} </h6>
-
-        {% include "finances/stock_graph.html" %}
-
-        <div class="d-grid mt-4 mb-4">
-            <a class="btn btn-primary" role="button" href="{% url "finances:tunnel_form" stock_symbol %}">
-                Configurar tunel
-            </a>
+        {% include "finances/header.html" %}
+        <div class="body-content">
+            <h3 class="mt-3"> {{ stock_symbol }} </h3>
+            <h6> Último valor: {{ last_price }} às {{ last_datetime }} </h6>
+            
+            {% include "finances/stock_graph.html" %}
+            
+            <div class="d-grid mt-4 mb-4">
+                <a class="btn btn-primary" role="button" href="{% url "finances:tunnel_form" stock_symbol %}">
+                    Configurar tunel
+                </a>
+            </div>
+            
+            {% include "finances/tunnels_table.html" %}
+            
         </div>
-
-        {% include "finances/tunnels_table.html" %}
-        
     </body>
 </html>

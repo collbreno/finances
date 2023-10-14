@@ -92,6 +92,7 @@ def symbol(request, stock_symbol):
         'stock_symbol': stock_symbol.upper(),
         'tunnels': tunnels,
         'last_price': locale.currency(graph_data['y'][-1]),
+        'last_datetime': graph_data['x'][-1],
     }
 
     return render(request, 'finances/symbol.html', context)
