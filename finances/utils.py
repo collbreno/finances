@@ -15,3 +15,6 @@ def get_stock_graph_data(stock_symbol: str):
     }
 
     return graph_data
+
+def format_stock_symbol(original: str):
+    return original.replace("<em>", "").replace("</em>", "")+".SA".upper()

@@ -1,13 +1,14 @@
 import json
 import locale
+import requests
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import generic
 
 from .models import User, Tunnel, Notification
-from .utils import get_stock_graph_data
+from .utils import get_stock_graph_data, format_stock_symbol
 from .constants import ALL_STOCKS
 from .exceptions import EmptyStockHistory
 
@@ -19,6 +20,26 @@ def symbols(request):
         'symbols': ALL_STOCKS,
     }
     return render(request, "finances/symbols.html", context=context)
+
+def get_symbol_suggestions(request):
+    query = request.GET.get('query', '')
+    url = 'https://symbol-search.tradingview.com/symbol_search/v3/'
+    params = {
+        'sort_by_country': 'BR',
+        'domain': 'bovespa',
+        'start': 0,
+        'search_type': 'undefined',
+        'lang': 'pt',
+        'hl': 1,
+        'text': query
+    }
+
+    response = requests.get(url, params=params)
+    response_data = response.json()
+    
+    symbols = [format_stock_symbol(item['symbol']) for item in response_data.get('symbols', [])]
+
+    return JsonResponse({'symbols': json.dumps(symbols)})
 
 def new_user_form(request):
     return render(request, "finances/new_user_form.html")

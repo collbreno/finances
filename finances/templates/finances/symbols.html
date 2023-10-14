@@ -5,6 +5,7 @@
         <title>Ações</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
         <style>
             .body-content {
                 max-width: 900px;
@@ -15,35 +16,89 @@
     <body>
         {% include "finances/header.html" %}
         <div class="body-content">
-            <input class=" mt-3 form-control" type="text" id="search_input" onkeyup="myFunction()" placeholder="Pesquise por um símbolo...">
+            <input class=" mt-3 form-control" type="text" id="search_input" placeholder="Pesquise por um símbolo...">
             
-            <div class="mt-3 list-group" id="symbol_list">
-                {% for symbol in symbols %}
-                <a  class="list-group-item list-group-item-action" 
-                href="{% url 'finances:symbol' symbol %}">
-                {{ symbol }}
-            </a>
-            {% endfor %}
-        </div>
+            <div id="loading_indicator">
+                <div class="d-flex justify-content-center mt-5">
+                    <div class="spinner-border" role="status">
+                    </div>
+                </div>
+            </div>            
+            <div id="empty_indicator">
+                <div class="d-flex justify-content-center mt-5">
+                    <h6 id="empty_indicator">Nenhum resultado encontrado</h6>
+                </div>
+            </div>
+            <div class="mt-3 list-group" id="stock_list">
+            </div>
         
+        </div>
         <script>
-            function myFunction() {
-                var input, filter, listGroup, a, i, txtValue, items;
-                input = document.getElementById("search_input");
-                filter = input.value.toUpperCase();
-                listGroup = document.getElementById("symbol_list");
-                items = listGroup.getElementsByTagName("a");
-                for (i = 0; i < items.length; i++) {
-                    item = items[i]
-                    txtValue = item.textContent || item.innerText;
-                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                        item.style.display = "";
-                    } else {
-                        item.style.display = "none";
+            $(document).ready(function() {
+                let $textInput = $('#search_input')
+                let $suggestionList = $('#stock_list')
+                let $loadingIndicator = $('#loading_indicator')
+                let $emptyIndicator = $('#empty_indicator')
+
+
+                function debounce(callback, timeout = 300) {
+                    let timer
+                    return (...args) => {
+                        clearTimeout(timer)
+                        timer = setTimeout(() => { callback.apply(this, args); }, timeout);
                     }
                 }
-            }
+
+                function loadSuggestions() {
+                    $suggestionList.hide()
+                    $emptyIndicator.hide()
+                    $loadingIndicator.show()
+                    var query = $textInput.val()
+                    console.log('query:', query)
+
+                    $.ajax({
+                        url: '/finances/get_symbol_suggestions/',
+                        method: 'GET',
+                        data: { query: query },
+                        dataType: 'json',
+                        success: function(data) {
+                            console.log('sucesso!')
+                            updateSuggestionList(data)
+                        },
+                        error: function() {
+                            console.log('Error fetching B3 api')
+                        }
+                    })
+                }
+
+                const onTextChanged = debounce(loadSuggestions)
+
+                loadSuggestions()
+
+                function updateSuggestionList(data) {
+                    $suggestionList.empty();
+                    let stocks = JSON.parse(data["symbols"])
+                    $.each(stocks, function(index, stockSymbol) {
+                        let link = $("<a>")
+                            .addClass('list-group-item list-group-item-action')
+                            .attr('href', '/finances/symbols/'+stockSymbol)
+                            .text(stockSymbol)
+                        $suggestionList.append(link)
+                    })
+                    if (stocks.length) {
+                        console.log('tem itens')
+                        $suggestionList.show()
+                        $emptyIndicator.hide()
+                    } else {
+                        console.log('está vazia')
+                        $suggestionList.hide()
+                        $emptyIndicator.show()
+                    }
+                    $loadingIndicator.hide()
+                }
+
+                $textInput.keyup(onTextChanged)
+            })
         </script>
-    </div>
     </body>
 </html>

@@ -13,6 +13,7 @@ urlpatterns = [
     path("add_tunnel/", views.add_tunnel, name="add_tunnel"),
     path("delete_tunnel/", views.delete_tunnel, name="delete_tunnel"),
     path("symbols/", views.symbols, name="symbols"),
+    path("get_symbol_suggestions/", views.get_symbol_suggestions, name="get_symbol_suggestions"),
     path("symbols/<str:stock_symbol>/", views.symbol, name="symbol"),
     path("symbols/<str:stock_symbol>/tunnel_form/", views.tunnel_form, name="tunnel_form"),
 ]
