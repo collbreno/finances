@@ -1,8 +1,10 @@
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
+from django.core.mail import send_mail
+from django.conf import settings
 
 from .models import Tunnel, Notification
-from .utils import download_stock
+from .utils import download_stock, format_email_message
 
 
 def schedule_tasks_for_existing_tunnels(scheduler: BlockingScheduler):
@@ -20,17 +22,17 @@ def watch_tunnel(scheduler: BlockingScheduler, tunnel: Tunnel):
         max_instances=1,
         replace_existing=True,
     )
-    print(f'Adicionei task do tunel {tunnel.id}')
+    print(f'Task added for tunnel#{tunnel.id} ({tunnel.stock_symbol})')
 
 def check_tunnel(tunnel: Tunnel):
-    print('rodando task do tunnel')
+    print(f'Running task for tunnel#{tunnel.id}')
     stock_symbol = tunnel.stock_symbol
     history = download_stock(stock_symbol)
     stock_datetime = history['datetime'].iloc[-1]
     stock_price = history['price'].iloc[-1]
 
     try:
-        last_notification_dt = Notification.objects.filter(tunnel__stock_symbol=stock_symbol).latest('datetime').datetime
+        last_notification_dt = Notification.objects.filter(tunnel=tunnel).latest('datetime').datetime
     except Notification.DoesNotExist:
         last_notification_dt = None
     
@@ -45,7 +47,7 @@ def check_tunnel(tunnel: Tunnel):
                 suggestion = Notification.SELL,
             )
             notification.save()
-            send_email(notification)
+            __send_email(notification)
         elif stock_price < tunnel.min_limit:
             notification = Notification(
                 tunnel = tunnel,
@@ -54,10 +56,15 @@ def check_tunnel(tunnel: Tunnel):
                 suggestion = Notification.BUY,
             )
             notification.save()
-            send_email(notification)
+            __send_email(notification)
     else:
         print(f"Stock {stock_symbol} doesn't have updated price")
 
-def send_email(notification: Notification):
-    print(f"Sending email: {notification}")
-    #TODO: implement email
+def __send_email(notification: Notification):
+    send_mail(
+        subject="Limite de túnel atingido",
+        from_email=settings.EMAIL_HOST_USER,
+        message=format_email_message(notification),
+        recipient_list=[notification.tunnel.user.email],
+        fail_silently=False,
+    )

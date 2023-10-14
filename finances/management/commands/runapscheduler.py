@@ -33,14 +33,6 @@ class Command(BaseCommand):
   help = "Runs APScheduler."
 
   def handle(self, *args, **options):
-    logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s [%(levelname)s] %(message)s',
-            handlers=[
-                logging.StreamHandler()
-            ]
-        )
-    
     scheduler = BlockingScheduler(timezone=settings.TIME_ZONE)
     scheduler.add_jobstore(DjangoJobStore(), "default")
     schedule_tasks_for_existing_tunnels(scheduler)

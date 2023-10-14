@@ -1,6 +1,7 @@
 <table class="table">
     <thead>
         <tr>
+            <th>ID do túnel</th>
             <th>Símbolo</th>
             <th>Email</th>
             <th>Valor</th>
@@ -11,6 +12,7 @@
     <tbody>
         {% for notification in notifications %}
             <tr>
+                <td>{{ notification.tunnel.id }}</td>
                 <td>
                     <a href="{% url "finances:symbol" notification.tunnel.stock_symbol %}">
                         {{ notification.tunnel.stock_symbol }}

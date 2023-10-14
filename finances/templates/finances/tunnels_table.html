@@ -1,17 +1,19 @@
 <table class="table">
     <thead>
         <tr>
+            <th>ID do túnel</th>
             <th>Símbolo</th>
             <th>Email</th>
             <th>Limite mínimo</th>
             <th>Limite máximo</th>
-            <th>Intervalo (em minutos)</th>
+            <th>Intervalo (min)</th>
             <th>Ações</th>
         </tr>
     </thead>
     <tbody>
         {% for tunnel in tunnels %}
             <tr>
+                <td>{{ tunnel.id }}</td>
                 <td>
                     <a href="{% url "finances:symbol" tunnel.stock_symbol %}">
                         {{ tunnel.stock_symbol }}
