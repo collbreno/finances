@@ -30,7 +30,7 @@ def format_email_message(notification: Notification):
     stock_symbol = notification.tunnel.stock_symbol
     formatted_datetime = notification.datetime.strftime('%d/%m/%Y %H:%M')
     message = (f"Oi {user.name}!\n"
-               f"O limite do seu túnel#{notification.tunnel.id} definido para a ação {stock_symbol} "
+               f"O limite do seu túnel #{notification.tunnel.id} definido para a ação {stock_symbol} "
                f"foi atingido em {formatted_datetime}. Você deve "
                f"{notification.get_suggestion_display().upper()} a ação por "
                f"{format_currency(notification.price)}.")

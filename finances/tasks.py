@@ -2,10 +2,17 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 from django.core.mail import send_mail
 from django.conf import settings
+from django.core import mail
+from datetime import datetime
 
 from .models import Tunnel, Notification
-from .utils import download_stock, format_email_message
+from .utils import download_stock_history, format_email_message
 
+print('Getting mail connection...')
+mail_connection = mail.get_connection()
+print('Opening connection...')
+mail_connection.open()
+print('Connection open!')
 
 def schedule_tasks_for_existing_tunnels(scheduler: BlockingScheduler):
     tunnels = Tunnel.objects.all()
@@ -25,9 +32,9 @@ def watch_tunnel(scheduler: BlockingScheduler, tunnel: Tunnel):
     print(f'Task added for tunnel#{tunnel.id} ({tunnel.stock_symbol})')
 
 def check_tunnel(tunnel: Tunnel):
-    print(f'Running task for tunnel#{tunnel.id}')
+    print(f'[{datetime.now().strftime("%H:%M:%S")}] Running task for tunnel#{tunnel.id}')
     stock_symbol = tunnel.stock_symbol
-    history = download_stock(stock_symbol)
+    history = download_stock_history(stock_symbol)
     stock_datetime = history['datetime'].iloc[-1]
     stock_price = history['price'].iloc[-1]
 
@@ -61,10 +68,12 @@ def check_tunnel(tunnel: Tunnel):
         print(f"Stock {stock_symbol} doesn't have updated price")
 
 def __send_email(notification: Notification):
+    print('Sending email...')
     send_mail(
         subject="Limite de túnel atingido",
         from_email=settings.EMAIL_HOST_USER,
         message=format_email_message(notification),
         recipient_list=[notification.tunnel.user.email],
         fail_silently=False,
+        connection=mail_connection
     )

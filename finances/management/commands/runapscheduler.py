@@ -35,6 +35,7 @@ class Command(BaseCommand):
   def handle(self, *args, **options):
     scheduler = BlockingScheduler(timezone=settings.TIME_ZONE)
     scheduler.add_jobstore(DjangoJobStore(), "default")
+
     schedule_tasks_for_existing_tunnels(scheduler)
 
     scheduler.add_job(
