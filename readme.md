@@ -47,4 +47,4 @@ Start the development server:
 ```
 python manage.py runserver
 ```
-Now you can access the project at `http://localhost:8000/finances` in your web browser.
+Now you can access the project at http://localhost:8000/finances in your web browser.
