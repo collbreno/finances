@@ -2,7 +2,7 @@
 # Setting up Django and packages
 First of all, install `django` and other dependencies used in this project:
 ```
-pip install django apscheduler yahooquery
+pip install django django-apscheduler yahooquery
 ```
 Run the migrations to create and set up the database.
 ```

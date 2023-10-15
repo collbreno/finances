@@ -1,5 +1,7 @@
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
+from django_apscheduler.jobstores import DjangoJobStore
+from django_apscheduler import util
 from django.core.mail import send_mail
 from django.conf import settings
 from django.core import mail
@@ -8,30 +10,52 @@ from datetime import datetime
 from .models import Tunnel, Notification
 from .utils import download_stock_history, format_email_message
 
+print('Creating scheduler...')
+scheduler = BlockingScheduler(timezone=settings.TIME_ZONE)
+print('Scheduler created!')
 print('Getting mail connection...')
 mail_connection = mail.get_connection()
 print('Opening connection...')
 mail_connection.open()
 print('Connection open!')
+tunnel_id_set = set()
 
-def schedule_tasks_for_existing_tunnels(scheduler: BlockingScheduler):
-    tunnels = Tunnel.objects.all()
-    for tunnel in tunnels:
-        watch_tunnel(scheduler, tunnel)
+def schedule_database_watcher():
+    scheduler.add_jobstore(DjangoJobStore(), "default")
+    print("Scheduling database watcher")
+    scheduler.add_job(
+        __watch_database,
+        #TODO: change to 1 minute
+        trigger=CronTrigger(second="*/10"),
+        id='database_watcher',
+        max_instances=1,
+        replace_existing=True,
+    )
     scheduler.start()
 
-def watch_tunnel(scheduler: BlockingScheduler, tunnel: Tunnel):
+@util.close_old_connections
+def __watch_database():
+    print(f'[{datetime.now().strftime("%H:%M:%S")}] Looking for new tunnels in database...')
+    tunnels = Tunnel.objects.all()
+    for tunnel in tunnels:
+        if tunnel.id not in tunnel_id_set:
+            __watch_tunnel(tunnel)
+
+def __watch_tunnel(tunnel: Tunnel):
+    tunnel_id_set.add(tunnel.id)
     scheduler.add_job(
-        check_tunnel,
+        __check_tunnel,
         args=(tunnel,),
+        #TODO: change to minutes
         trigger=CronTrigger(second=f"*/{tunnel.time_interval}"),
         id=f'tunnel#{tunnel.id}',
         max_instances=1,
         replace_existing=True,
     )
-    print(f'Task added for tunnel#{tunnel.id} ({tunnel.stock_symbol})')
+    print(f'Schedule added for tunnel#{tunnel.id} ({tunnel.stock_symbol})')
 
-def check_tunnel(tunnel: Tunnel):
+@util.close_old_connections
+def __check_tunnel(tunnel: Tunnel):
     print(f'[{datetime.now().strftime("%H:%M:%S")}] Running task for tunnel#{tunnel.id}')
     stock_symbol = tunnel.stock_symbol
     history = download_stock_history(stock_symbol)
@@ -45,7 +69,6 @@ def check_tunnel(tunnel: Tunnel):
     
     # stock from yf is more recent than last notification
     if not last_notification_dt or stock_datetime > last_notification_dt:
-        print(f"Stock {stock_symbol} has new price!")
         if stock_price > tunnel.max_limit:
             notification = Notification(
                 tunnel = tunnel,
@@ -64,11 +87,9 @@ def check_tunnel(tunnel: Tunnel):
             )
             notification.save()
             __send_email(notification)
-    else:
-        print(f"Stock {stock_symbol} doesn't have updated price")
 
 def __send_email(notification: Notification):
-    print('Sending email...')
+    print(f'Sending email... (tunnel#{notification.tunnel.id})')
     send_mail(
         subject="Limite de túnel atingido",
         from_email=settings.EMAIL_HOST_USER,
