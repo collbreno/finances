@@ -4,20 +4,23 @@ import locale
 from .exceptions import EmptyStockHistory
 from .models import Notification
 
-def download_stock(stock_symbol: str):
+def download_stock_history(stock_symbol: str):
     ticker = yq.Ticker(stock_symbol).history(period='1d', interval='1m')
     if ticker.empty:
         raise EmptyStockHistory()
     return ticker.reset_index()[['date', 'close']].rename(columns={'date':'datetime', 'close': 'price'})
 
-def get_stock_graph_data(stock_symbol: str):
-    df = download_stock(stock_symbol)
+def get_stock_data(stock_symbol: str):
+    df = download_stock_history(stock_symbol)
     graph_data = {
         'x': df['datetime'].dt.strftime('%H:%M').tolist(),
         'y': df['price'].tolist(),
     }
 
-    return graph_data
+    return {
+        'graph_data': graph_data,
+        'date': df['datetime'].iloc[-1].strftime('%d/%m/%Y'),
+    }
 
 def format_stock_symbol(original: str):
     return original.replace("<em>", "").replace("</em>", "")+".SA".upper()

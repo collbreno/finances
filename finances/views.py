@@ -1,5 +1,4 @@
 import json
-import locale
 import requests
 
 from django.http import HttpResponseRedirect, JsonResponse
@@ -8,7 +7,7 @@ from django.urls import reverse
 from django.views import generic
 
 from .models import User, Tunnel, Notification
-from .utils import get_stock_graph_data, format_stock_symbol, format_currency
+from .utils import get_stock_data, format_stock_symbol, format_currency
 from .constants import ALL_STOCKS
 from .exceptions import EmptyStockHistory
 
@@ -93,12 +92,13 @@ class UserView(generic.DetailView):
         return context
     
 def tunnel_form(request, stock_symbol):
-    graph_data = get_stock_graph_data(stock_symbol)
+    stock_data = get_stock_data(stock_symbol)
     emails = list(map(lambda p: p.email, User.objects.all()))    
 
     context = {
         'emails': emails,
-        'graph_data': json.dumps(graph_data),
+        'graph_data': json.dumps(stock_data['graph_data']),
+        'date': stock_data['date'],
         'stock_symbol': stock_symbol.upper(),
     }
 
@@ -106,7 +106,7 @@ def tunnel_form(request, stock_symbol):
 
 def symbol(request, stock_symbol):
     try:
-        graph_data = get_stock_graph_data(stock_symbol)
+        stock_data = get_stock_data(stock_symbol)
     except EmptyStockHistory:
         context = {
             'error_message': f'A ação {stock_symbol} não possui histórico de preço.'
@@ -114,13 +114,15 @@ def symbol(request, stock_symbol):
         return render(request, 'finances/error_page.html', context)
     
     tunnels = Tunnel.objects.filter(stock_symbol=stock_symbol)
+    graph_data = stock_data['graph_data']
 
     context = {
         'graph_data': json.dumps(graph_data),
         'stock_symbol': stock_symbol.upper(),
         'tunnels': tunnels,
         'last_price': format_currency(graph_data['y'][-1]),
-        'last_datetime': graph_data['x'][-1],
+        'last_price_time': graph_data['x'][-1],
+        'date': stock_data['date'],
     }
 
     return render(request, 'finances/symbol.html', context)
