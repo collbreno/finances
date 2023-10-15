@@ -13,7 +13,7 @@
     <tbody>
         {% for tunnel in tunnels %}
             <tr>
-                <td>{{ tunnel.id }}</td>
+                <td>#{{ tunnel.id }}</td>
                 <td>
                     <a href="{% url "finances:symbol" tunnel.stock_symbol %}">
                         {{ tunnel.stock_symbol }}
