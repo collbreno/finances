@@ -3,7 +3,7 @@
         <tr>
             <th>ID do túnel</th>
             <th>Símbolo</th>
-            <th>Email</th>
+            <th>Usuário</th>
             <th>Valor</th>
             <th>Data e Hora</th>
             <th>Sugestão</th>
@@ -19,8 +19,8 @@
                     </a>
                 </td>
                 <td>
-                    <a href="{% url "finances:user" notification.tunnel.user %}">
-                        {{ notification.tunnel.user }}
+                    <a href="{% url "finances:user" notification.tunnel.user.id %}">
+                        {{ notification.tunnel.user.name }}
                     </a>
                 </td>
                 <td>{{ notification.price }}</td>

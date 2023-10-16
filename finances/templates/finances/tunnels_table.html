@@ -3,7 +3,7 @@
         <tr>
             <th>ID do túnel</th>
             <th>Símbolo</th>
-            <th>Email</th>
+            <th>Usuário</th>
             <th>Limite mínimo</th>
             <th>Limite máximo</th>
             <th>Intervalo (min)</th>
@@ -20,8 +20,8 @@
                     </a>
                 </td>
                 <td>
-                    <a href="{% url "finances:user" tunnel.user %}">
-                        {{ tunnel.user }}
+                    <a href="{% url "finances:user" tunnel.user.id %}">
+                        {{ tunnel.user.name }}
                     </a>
                 </td>
                 <td>{{ tunnel.min_limit }}</td>
