@@ -48,7 +48,6 @@ def __watch_tunnel(tunnel: Tunnel):
     scheduler.add_job(
         __check_tunnel,
         args=(tunnel,),
-        #TODO: change to minutes
         trigger=CronTrigger(minute=f"*/{tunnel.time_interval}"),
         id=f'tunnel#{tunnel.id}',
         max_instances=1,
