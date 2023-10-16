@@ -1,8 +1,9 @@
 from django.db import models
+from django.core.validators import MinLengthValidator, EmailValidator
 
 class User(models.Model):
-    email = models.CharField(max_length=200, unique=True)
-    name = models.CharField(max_length=200)
+    email = models.CharField(max_length=200, unique=True, validators=[EmailValidator()])
+    name = models.CharField(max_length=200, validators=[MinLengthValidator(2)])
 
     def __str__(self):
         return self.email
